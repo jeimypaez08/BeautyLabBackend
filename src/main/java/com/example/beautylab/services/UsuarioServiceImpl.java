@@ -7,12 +7,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.beautylab.dtos.CambioContraDto;
+import com.example.beautylab.dtos.LoginDto;
 import com.example.beautylab.dtos.UsuarioRegistroDto;
+import com.example.beautylab.exceptions.CorreoExistenteException;
 import com.example.beautylab.mapper.UsuarioMapper;
+import com.example.beautylab.models.Rol;
 import com.example.beautylab.models.Usuario;
 import com.example.beautylab.models.UsuarioAuth;
 import com.example.beautylab.repositories.UsuarioAuthRepository;
 import com.example.beautylab.repositories.UsuarioRepository;
+import com.example.beautylab.security.JwtService;
+
 
 
 
@@ -27,24 +32,30 @@ public class UsuarioServiceImpl implements UsuarioService {
   
     private final PasswordEncoder passwordEncoder;
 
-    public UsuarioServiceImpl(UsuarioRepository userRepo, UsuarioAuthRepository authRepo, 
-                              UsuarioMapper usermapper, PasswordEncoder passwordEncoder) {
+    public UsuarioServiceImpl(UsuarioRepository userRepo, 
+                              UsuarioAuthRepository authRepo, 
+                              UsuarioMapper usermapper, 
+                              PasswordEncoder passwordEncoder,
+                            JwtService jwtService) {
         this.userRepo = userRepo;
         this.authRepo = authRepo;
         this.usermapper = usermapper;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
     @Transactional
-    public UsuarioRegistroDto registrarUsuario(UsuarioRegistroDto Dto){
-        if (authRepo.findByCorreo(Dto.getCorreo()).isPresent()) {
-        throw new RuntimeException("El correo ya está registrado, intenta con otro.");
+    public UsuarioRegistroDto registrarUsuario(UsuarioRegistroDto dto){
+        if (authRepo.findByCorreo(dto.getCorreo()).isPresent()) {
+        throw new CorreoExistenteException("El correo " + dto.getCorreo() + " ya está registrado, intenta con otro.");
     }
+    //Fuerza a que cualquier usuario que se registre por su cuenta sea solo CLIENTE
+        dto.setRoles(List.of(Rol.CLIENTE));
 
         //mapeo a entidades
-        UsuarioAuth auth= usermapper.toAuthEntity(Dto);
-        Usuario perfil= usermapper.toPerfilEntity(Dto);
+        UsuarioAuth auth= usermapper.toAuthEntity(dto);
+        Usuario perfil= usermapper.toPerfilEntity(dto);
 
         //encriptar contraseña
         auth.setPassword(passwordEncoder.encode(auth.getPassword()));
@@ -54,7 +65,24 @@ public class UsuarioServiceImpl implements UsuarioService {
         perfil.setId(savedAuth.getId()); // Asegura que el perfil tenga el mismo id que la autenticación
         userRepo.save(perfil);
 
-        return Dto;
+        return dto;
+    }
+
+    private final JwtService jwtService;
+
+    @Override
+    //login
+    public String login(LoginDto loginDto){
+        //buscar usuario por correo
+        UsuarioAuth usuarioAuth = authRepo.findByCorreo(loginDto.getCorreo())
+            .orElseThrow(() -> new RuntimeException("Correo no registrado"));
+
+        //verificar contraseña
+        if (!passwordEncoder.matches(loginDto.getPassword(), usuarioAuth.getPassword())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        return jwtService.generarToken(usuarioAuth.getCorreo());
     }
 
     @Override
@@ -82,14 +110,14 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     //actualizar usuario
     @Transactional
-    public void actualizarUsuario(String id, UsuarioRegistroDto Dto){
+    public void actualizarUsuario(String id, UsuarioRegistroDto dto){
         Usuario usuario = userRepo.findById(id)
         .orElseThrow(() -> new RuntimeException("Perfil no encontrado"));
         UsuarioAuth auth = authRepo.findById(id)
         .orElseThrow(() -> new RuntimeException("Cuenta no encontrado"));
 
-        usermapper.updatePerfil(Dto, usuario);
-        usermapper.updateAuth(Dto, auth);
+        usermapper.updatePerfil(dto, usuario);
+        usermapper.updateAuth(dto, auth);
 
         userRepo.save(usuario);
         authRepo.save(auth);

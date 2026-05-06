@@ -53,9 +53,4 @@ public class UsuarioRegistroDto {
 
     @NotBlank
     private String telefono;
-
-
-
-
-
 }
