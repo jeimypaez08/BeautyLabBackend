@@ -34,9 +34,9 @@ public class UsuarioAuth {
 
     @NotNull
     private List<Rol> roles; // lista de roles usando enum
-    
+
     @Builder.Default
-    private Boolean cuentaActiva = true;
+    private Boolean cuentaActiva = false;
 
 
 }
