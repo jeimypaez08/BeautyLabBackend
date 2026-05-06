@@ -34,7 +34,7 @@ public class UsuarioRegistroDto {
     private String password;
 
     @Builder.Default
-    private boolean cuentaActiva = true;
+    private Boolean cuentaActiva = true;
 
     @NotEmpty(message = "Debe asignar 1 rol")
     private List<Rol> roles;

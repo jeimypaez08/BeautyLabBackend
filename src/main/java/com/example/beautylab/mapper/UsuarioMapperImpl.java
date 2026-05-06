@@ -20,7 +20,7 @@ public class UsuarioMapperImpl implements UsuarioMapper {
         .correo(Dto.getCorreo())
         .password(Dto.getPassword()) // Se encriptará en el Service
         .roles(Dto.getRoles())
-        .cuentaActiva(true)
+        .cuentaActiva(Dto.getCuentaActiva())
         .build();
     }
 
@@ -61,25 +61,41 @@ public class UsuarioMapperImpl implements UsuarioMapper {
         .correo(usuarioAuth.getCorreo())
         .password(usuarioAuth.getPassword())
         .roles(usuarioAuth.getRoles())
-        .cuentaActiva(true)
+        .cuentaActiva(usuarioAuth.getCuentaActiva())
         .build();
 }
 
     @Override
     public void updatePerfil(UsuarioRegistroDto Dto, Usuario usuario) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updatePerfil'");
+        if(Dto == null || usuario == null)
+            return;
+
+        if(usuario.getNombre() !=null) usuario.setNombre(Dto.getNombre());
+        if(usuario.getApellido() !=null) usuario.setApellido(Dto.getApellido());
+        if(usuario.getDocumento() !=null) usuario.setDocumento(Dto.getDocumento());
+        if(usuario.getCorreo() !=null) usuario.setCorreo(Dto.getCorreo());
+        if(usuario.getTelefono() !=null) usuario.setTelefono(Dto.getTelefono());
+        if(usuario.getDireccion() !=null) usuario.setDireccion(Dto.getDireccion());
     }
 
     @Override
     public void updateAuth(UsuarioRegistroDto Dto, UsuarioAuth usuarioAuth) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateAuth'");
+        if(Dto == null || usuarioAuth == null)
+            return;
+
+        if(usuarioAuth.getCorreo() !=null) usuarioAuth.setCorreo(Dto.getCorreo());
+        if(usuarioAuth.getPassword() !=null) usuarioAuth.setPassword(Dto.getPassword()); // Se encriptará en el Service
+        if(usuarioAuth.getRoles() !=null) usuarioAuth.setRoles(Dto.getRoles());
+        usuarioAuth.setCuentaActiva(Dto.getCuentaActiva());
     }
 
     @Override
     public List<UsuarioRegistroDto> toDtoList(List<Usuario> usuarios) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'toDtoList'");
+        if(usuarios == null)
+            return null;
+
+        return usuarios.stream()
+        .map(this::toUsuario)
+        .toList();
     }
 }
