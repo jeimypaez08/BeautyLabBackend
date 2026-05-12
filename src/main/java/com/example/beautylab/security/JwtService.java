@@ -21,10 +21,21 @@ public class JwtService {
          return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
+    //metodo para extraer el rol del token
+    public String extractRole(String token){
+        return Jwts.parserBuilder()
+        .setSigningKey(getKey())
+        .build()
+        .parseClaimsJws(token)
+        .getBody()
+        .get("role", String.class); // Aquí obtiene el valor del "role" como String
+    }
+
     //metodo para generar token
-    public String generarToken(String username){
+    public String generarToken(String username, String role){
         return Jwts.builder()
         .setSubject(username)//define nombre de usuario dentro del token
+        .claim("role", role)
         .setIssuedAt(new Date(System.currentTimeMillis()))//define la fecha de creacion
         .setExpiration(new Date(System.currentTimeMillis()+ 1000 * 60 * 60 * 10 ))
         .signWith(getKey())//metodo de encriptacion
@@ -42,4 +53,6 @@ public class JwtService {
         .getSubject(); // Aquí obtiene el valor del "subject", que es el username
         
     }
+
+    
 }

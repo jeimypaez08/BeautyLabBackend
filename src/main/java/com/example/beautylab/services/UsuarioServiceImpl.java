@@ -11,7 +11,6 @@ import com.example.beautylab.dtos.LoginDto;
 import com.example.beautylab.dtos.UsuarioRegistroDto;
 import com.example.beautylab.exceptions.CorreoExistenteException;
 import com.example.beautylab.mapper.UsuarioMapper;
-import com.example.beautylab.models.Rol;
 import com.example.beautylab.models.Usuario;
 import com.example.beautylab.models.UsuarioAuth;
 import com.example.beautylab.repositories.UsuarioAuthRepository;
@@ -50,22 +49,38 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (authRepo.findByCorreo(dto.getCorreo()).isPresent()) {
         throw new CorreoExistenteException("El correo " + dto.getCorreo() + " ya está registrado, intenta con otro.");
     }
-    //Fuerza a que cualquier usuario que se registre por su cuenta sea solo CLIENTE
-        dto.setRoles(List.of(Rol.CLIENTE));
 
-        //mapeo a entidades
+    //mapeo a entidades
         UsuarioAuth auth= usermapper.toAuthEntity(dto);
         Usuario perfil= usermapper.toPerfilEntity(dto);
+        
+    // Si el registro NO trae roles, se asigna CLIENTE por defecto
+    if(dto.getRoles() == null || dto.getRoles().isEmpty()){
+        auth.setRoles(List.of("CLIENTE"));
+    }
+
+    // Si el rol es ADMIN o EMPLEADO, la cuenta se activa automáticamente, de lo contrario (CLIENTE) queda inactiva para validar correo
+    if(dto.getRoles().contains("ADMIN") || dto.getRoles().contains("EMPLEADO")){
+        auth.setCuentaActiva(true);
+    }else{
+        auth.setCuentaActiva(false); // Clientes empiezan en false para validar correo  
+    }
 
         //encriptar contraseña
         auth.setPassword(passwordEncoder.encode(auth.getPassword()));
 
         //guardar en BD
-        UsuarioAuth savedAuth = authRepo.save(auth);
+        UsuarioAuth savedAuth = authRepo.save(auth); //Guardar primero la autenticación para obtener el ID
         perfil.setId(savedAuth.getId()); // Asegura que el perfil tenga el mismo id que la autenticación
         userRepo.save(perfil);
 
-        return dto;
+        //Respuesta: Mapear de vuelta a DTO desde lo que se guardó en BD
+       // Esto asegura que el JSON de respuesta muestre el ID y el cuentaActiva real
+       UsuarioRegistroDto respuesta = usermapper.toUsuario(perfil); // Trae datos del perfil
+       respuesta.setRoles(savedAuth.getRoles());
+       respuesta.setCuentaActiva(savedAuth.getCuentaActiva()); // Aquí ya no será null
+
+        return respuesta;
     }
 
     private final JwtService jwtService;
@@ -77,12 +92,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         UsuarioAuth usuarioAuth = authRepo.findByCorreo(loginDto.getCorreo())
             .orElseThrow(() -> new RuntimeException("Correo no registrado"));
 
+        //verficar si la cuenta está activa
+        if(!Boolean.TRUE.equals(usuarioAuth.getCuentaActiva())){
+            throw new RuntimeException("La cuenta no está activa, por favor verifica tu correo");
+        }
+
         //verificar contraseña
         if (!passwordEncoder.matches(loginDto.getPassword(), usuarioAuth.getPassword())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
 
-        return jwtService.generarToken(usuarioAuth.getCorreo());
+        //generar token JWT, se incluye el rol del usuario para que pueda ser usado en la autorizacion de rutas protegidas
+        String userRole = usuarioAuth.getRoles().get(0).toString();
+
+        return jwtService.generarToken(usuarioAuth.getCorreo(), userRole);
     }
 
     @Override

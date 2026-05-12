@@ -3,12 +3,14 @@ package com.example.beautylab.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity // Habilita la seguridad a nivel de metodo, permite usar anotaciones como @PreAuthorize en los controladores para definir permisos a nivel de metodo
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter; //inyeccion de dependencias del filtro de autenticacion JWT para que se ejecute en cada peticion y valide el token
@@ -25,7 +27,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth ->auth // Configuracion de autorizacion, se definen las rutas publicas y las rutas que requieren autenticacion
                 
                 .requestMatchers(HttpMethod.POST,"/api/usuarios/registro").permitAll()//registro publico
-                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()//login publico  
+                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()//login publico
+                
+                //ruta protegida para el admin
+                .requestMatchers(HttpMethod.POST, "/api/usuarios/registrar-empleado").hasAuthority("ADMIN")//registro de empleados solo para admin  
+
+                //cualquier otra ruta requiere estar logueado
                 .anyRequest().authenticated() // Cualquier otra ruta requiere autenticacion
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)// Agregar el filtro de autenticacion JWT antes del filtro de autenticacion por username y password

@@ -1,18 +1,22 @@
 package com.example.beautylab.security;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -44,8 +48,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             //3. Si el usuario existe y no está autenticado, se marca como autenticado (en este caso no se implementa la parte de cargar roles y permisos)
             if(username !=null && SecurityContextHolder.getContext().getAuthentication() == null){ //si el usuario no está autenticado
+                List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(jwtService.extractRole(token)));
                 UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(username, null, null);//en este caso no se cargan roles ni permisos, por eso el tercer parametro es null
+                new UsernamePasswordAuthenticationToken(username, null, authorities);//crear un token de autenticacion con el username y los roles extraidos del token JWT, en este caso no se valida contra la base de datos, se asume que si el token es valido, el usuario es valido
                 SecurityContextHolder.getContext().setAuthentication(authToken);//marcar como autenticado
             }
 
