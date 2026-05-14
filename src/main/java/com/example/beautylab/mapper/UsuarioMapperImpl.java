@@ -36,6 +36,7 @@ public class UsuarioMapperImpl implements UsuarioMapper {
         .correo(Dto.getCorreo())
         .telefono(Dto.getTelefono())
         .direccion(Dto.getDireccion())
+        .especialidades(Dto.getEspecialidades()) // Si el rol es CLIENTE, esto vendrá null, si es EMPLEADO tendrá un valor
         .build();
     }
 
@@ -50,6 +51,7 @@ public class UsuarioMapperImpl implements UsuarioMapper {
         .correo(usuario.getCorreo())
         .telefono(usuario.getTelefono())
         .direccion(usuario.getDireccion())
+        .especialidades(usuario.getEspecialidades())
         .build();
     }
 
@@ -70,12 +72,13 @@ public class UsuarioMapperImpl implements UsuarioMapper {
         if(Dto == null || usuario == null)
             return;
 
-        if(usuario.getNombre() !=null) usuario.setNombre(Dto.getNombre());
-        if(usuario.getApellido() !=null) usuario.setApellido(Dto.getApellido());
-        if(usuario.getDocumento() !=null) usuario.setDocumento(Dto.getDocumento());
-        if(usuario.getCorreo() !=null) usuario.setCorreo(Dto.getCorreo());
-        if(usuario.getTelefono() !=null) usuario.setTelefono(Dto.getTelefono());
-        if(usuario.getDireccion() !=null) usuario.setDireccion(Dto.getDireccion());
+        if(Dto.getNombre() !=null) usuario.setNombre(Dto.getNombre());
+        if(Dto.getApellido() !=null) usuario.setApellido(Dto.getApellido());
+        if(Dto.getDocumento() !=null) usuario.setDocumento(Dto.getDocumento());
+        if(Dto.getCorreo() !=null) usuario.setCorreo(Dto.getCorreo());
+        if(Dto.getTelefono() !=null) usuario.setTelefono(Dto.getTelefono());
+        if(Dto.getDireccion() !=null) usuario.setDireccion(Dto.getDireccion());
+        if(usuario.getEspecialidades() !=null) usuario.setEspecialidades(Dto.getEspecialidades());
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.example.beautylab.models;
 
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -32,5 +34,6 @@ public class Usuario {
     private String correo; // correo electrónico del usuario
     @NotBlank
     private String telefono; // número de teléfono del usuario
+    private List<Especialidades> especialidades; // especialidades del empleado, para el cliente será null
 
 }
