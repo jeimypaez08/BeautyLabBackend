@@ -55,5 +55,5 @@ public class UsuarioRegistroDto {
     private String telefono;
 
     // Campos que el cliente dejara vacíos pero el Admin llenará para los empleados
-    private Especialidades especialidades; // Solo para empleados, el cliente no lo verá    
+    private List<Especialidades>especialidades; // Solo para empleados, el cliente no lo verá    
 }

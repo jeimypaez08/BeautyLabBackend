@@ -49,15 +49,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         if (authRepo.findByCorreo(dto.getCorreo()).isPresent()) {
         throw new CorreoExistenteException("El correo " + dto.getCorreo() + " ya está registrado, intenta con otro.");
     }
+     // Si el registro NO trae roles, se asigna CLIENTE por defecto
+    if(dto.getRoles() == null || dto.getRoles().isEmpty()){
+        dto.setRoles(List.of("CLIENTE"));
+    }
+
+        if(dto.getRoles().contains("CLIENTE")){
+            dto.setEspecialidades(null); // Si el rol es CLIENTE, aseguramos que especialidades sea null
+        }
 
     //mapeo a entidades
         UsuarioAuth auth= usermapper.toAuthEntity(dto);
         Usuario perfil= usermapper.toPerfilEntity(dto);
         
-    // Si el registro NO trae roles, se asigna CLIENTE por defecto
-    if(dto.getRoles() == null || dto.getRoles().isEmpty()){
-        auth.setRoles(List.of("CLIENTE"));
-    }
+   
 
     // Si el rol es ADMIN o EMPLEADO, la cuenta se activa automáticamente, de lo contrario (CLIENTE) queda inactiva para validar correo
     if(dto.getRoles().contains("ADMIN") || dto.getRoles().contains("EMPLEADO")){
