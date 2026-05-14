@@ -14,4 +14,4 @@ public interface ServicioService {
     void eliminarServicio(String id);
     List<ServicioDto> filtrarPorCategoria(Especialidades categoria);
 
-}
+}   
