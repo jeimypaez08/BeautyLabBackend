@@ -28,7 +28,6 @@ public class Usuario {
     @Valid
     private Documento documento; // documento de identidad del usuario objeto con tipo y número
     private Direccion direccion; // dirección del usuario objeto con calle, numero, ciudad, y código postal
-    // private List<Direccion> dire; // lista de direcciones
     @NotBlank
     private String correo; // correo electrónico del usuario
     @NotBlank

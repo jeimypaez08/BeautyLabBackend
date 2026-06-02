@@ -33,10 +33,10 @@ public class UsuarioAuth {
     private String password; // dato de contraseña para autenticación encriptada(bcrypt)
 
     @NotNull
-    private List<Rol> roles; // lista de roles usando enum
-    
+    private List<String> roles; // lista de roles usando enum
+
     @Builder.Default
-    private Boolean cuentaActiva = true;
+    private Boolean cuentaActiva = false;
 
 
 }

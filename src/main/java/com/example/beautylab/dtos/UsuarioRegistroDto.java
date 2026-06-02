@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.example.beautylab.models.Direccion;
 import com.example.beautylab.models.Documento;
-import com.example.beautylab.models.Rol;
+import com.example.beautylab.models.Especialidades;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
@@ -33,11 +33,11 @@ public class UsuarioRegistroDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //al momento de hacer el response, no muestra la contraseña
     private String password;
 
-    @Builder.Default
-    private Boolean cuentaActiva = true;
+   
+    private Boolean cuentaActiva;
 
     @NotEmpty(message = "Debe asignar 1 rol")
-    private List<Rol> roles;
+    private List<String> roles;
 
     //datos del perfil
     @NotBlank(message = "El nombre es obligatorio")
@@ -54,8 +54,6 @@ public class UsuarioRegistroDto {
     @NotBlank
     private String telefono;
 
-
-
-
-
+    // Campos que el cliente dejara vacíos pero el Admin llenará para los empleados
+    private Especialidades especialidades; // Solo para empleados, el cliente no lo verá    
 }

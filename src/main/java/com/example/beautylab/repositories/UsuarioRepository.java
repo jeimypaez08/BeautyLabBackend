@@ -13,7 +13,7 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     Optional<Usuario> findByDocumento(Documento documento);
     Optional<Usuario> findByCorreo(String correo);
 
-    // Busca dentro del objeto anidado 'doc' el campo 'numero'
+    // Busca dentro del objeto anidado 'documento' el campo 'numero'
     Optional<Usuario> findByDocumentoNumero(String numero);
 
 }
